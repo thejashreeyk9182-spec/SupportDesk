@@ -10,8 +10,8 @@ export default defineConfig({
     globals: true,
     css: true,
 
-    coverage: {
-      provider: "v8",
+   coverage: {
+  provider: "istanbul",
       reporter: ["text", "html"],
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
