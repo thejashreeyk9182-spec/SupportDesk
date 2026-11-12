@@ -1,0 +1,156 @@
+
+
+
+.ticket-form {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  color: #1e293b;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ticket-form *,
+.ticket-form *::before,
+.ticket-form *::after {
+  box-sizing: border-box;
+}
+
+.ticket-form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ticket-form-header h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.ticket-form-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.ticket-form-close {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.ticket-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 22px 24px;
+}
+
+.ticket-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ticket-form-group label {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ticket-form-group input,
+.ticket-form-group textarea,
+.ticket-form-group select {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.ticket-form-group input:focus,
+.ticket-form-group textarea:focus,
+.ticket-form-group select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.ticket-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.ticket-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ticket-form-error {
+  color: #dc2626;
+  font-size: 12px;
+  margin: 0;
+}
+
+.ticket-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.ticket-form-actions button {
+  padding: 10px 18px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ticket-form-cancel {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.ticket-form-submit {
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.ticket-form-submit:hover {
+  background: #1d4ed8;
+}
+
+.ticket-form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .ticket-form-header,
+  .ticket-form-body,
+  .ticket-form-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .ticket-form-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "tickets": [
+    {
+      "id": "T102",
+      "customerName": "Priya Kumar",
+      "email": "priya@gmail.com",
+      "subject": "Login Issue",
+      "description": "Unable to log in.",
+      "priority": "High",
+      "status": "Open",
+      "createdAt": "2026-11-02T10:00:00.000Z",
+      "assignedTo": "U003"
+    },
+    {
+      "id": "T103",
+      "customerName": "Arun Kumar",
+      "email": "arun@gmail.com",
+      "subject": "Refund Request",
+      "description": "Requesting a refund.",
+      "priority": "Low",
+      "status": "In Progress",
+      "createdAt": "2026-11-01T11:00:00.000Z",
+      "assignedTo": "U003"
+    },
+    {
+      "id": "T104",
+      "customerName": "Sneha Rao",
+      "email": "sneha@gmail.com",
+      "subject": "POS Machine Issue",
+      "description": "POS machine is not responding.",
+      "priority": "High",
+      "status": "In Progress",
+      "createdAt": "2026-10-31T12:00:00.000Z",
+      "assignedTo": "U003"
+    },
+    {
+      "id": "T105",
+      "customerName": "Kiran Reddy",
+      "email": "kiran@gmail.com",
+      "subject": "Contact Update",
+      "description": "Need to update contact details.",
+      "priority": "Medium",
+      "status": "Resolved",
+      "createdAt": "2026-10-30T13:00:00.000Z",
+      "assignedTo": "U003"
+    },
+    {
+      "id": "T101",
+      "createdAt": "2026-11-03T09:00:00.000Z",
+      "assignedTo": "U003",
+      "customerName": "Rahul Sharma",
+      "subject": "Payment Failed",
+      "description": "Payment was deducted but order was not confirmed.",
+      "status": "In Progress",
+      "priority": "High",
+      "email": "rahul@gmail.com"
+    }
+  ]
+}
