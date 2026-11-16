@@ -37,6 +37,7 @@ export interface TicketQueryParams {
   status?: string;
   priority?: string;
   sort?: string;
+  assignedTo?: string;
   page?: number;
   limit?: number;
 }

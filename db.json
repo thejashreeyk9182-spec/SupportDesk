@@ -7,7 +7,7 @@
       "subject": "Login Issue",
       "description": "Unable to log in.",
       "priority": "High",
-      "status": "Open",
+      "status": "In Progress",
       "createdAt": "2026-11-02T10:00:00.000Z",
       "assignedTo": "U003"
     },
@@ -17,7 +17,7 @@
       "email": "arun@gmail.com",
       "subject": "Refund Request",
       "description": "Requesting a refund.",
-      "priority": "Low",
+      "priority": "High",
       "status": "In Progress",
       "createdAt": "2026-11-01T11:00:00.000Z",
       "assignedTo": "U003"
@@ -40,7 +40,7 @@
       "subject": "Contact Update",
       "description": "Need to update contact details.",
       "priority": "Medium",
-      "status": "Resolved",
+      "status": "In Progress",
       "createdAt": "2026-10-30T13:00:00.000Z",
       "assignedTo": "U003"
     },
@@ -54,6 +54,16 @@
       "status": "In Progress",
       "priority": "High",
       "email": "rahul@gmail.com"
+    },
+    {
+      "customerName": "sanjana",
+      "email": "sanju@123.com",
+      "subject": "Payment Failed",
+      "description": "payment issues",
+      "priority": "High",
+      "status": "In Progress",
+      "id": "T106",
+      "createdAt": "2026-11-13T07:22:39.755Z"
     }
   ]
 }

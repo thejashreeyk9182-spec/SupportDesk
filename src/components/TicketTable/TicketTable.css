@@ -1,0 +1,79 @@
+
+/* Actions column */
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 170px;
+}
+
+.table-actions button {
+  padding: 7px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.table-actions button:hover {
+  background: #f3f4f6;
+}
+
+.table-actions button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Status dropdown */
+.data-table select {
+  min-width: 135px;
+  padding: 7px 28px 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Table layout */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  min-width: 180px;
+}
+
+/* Assignment modal */
+.modal-agent-select {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #ffffff;
+  font-size: 14px;
+}
+
+.modal-assignment-error {
+  margin-top: 10px;
+  color: #dc2626;
+  font-size: 13px;
+}

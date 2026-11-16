@@ -1,37 +1,45 @@
 
-import { useEffect, useState } from "react";
-import { useAppDispatch } from "./useAppDispatch";
-import { useAppSelector } from "./useAppSelector";
+import { useState } from "react";
 
 import {
-  fetchTickets,
-  addTicket,
-  editTicket,
-  removeTicket,
-} from "../features/tickets/ticketThunks";
-
-import {
-  selectTickets,
-  selectTicketLoading,
-  selectTicketError,
-  selectTicketTotal,
-  selectTicketSubmitting,
-} from "../features/tickets/ticketSelectors";
+  useGetTicketsQuery,
+  useCreateTicketMutation,
+  useUpdateTicketMutation,
+  useDeleteTicketMutation,
+  useBulkUpdateStatusMutation,
+  useBulkAssignTicketsMutation,
+} from "../features/tickets/ticketApi";
 
 import type {
+  Ticket,
   TicketFormData,
   TicketQueryParams,
 } from "../features/tickets/ticket.types";
 
+const getApiErrorMessage = (error: unknown): string => {
+  if (error && typeof error === "object") {
+    if (
+      "message" in error &&
+      typeof error.message === "string"
+    ) {
+      return error.message;
+    }
+
+    if (
+      "data" in error &&
+      error.data &&
+      typeof error.data === "object" &&
+      "message" in error.data &&
+      typeof error.data.message === "string"
+    ) {
+      return error.data.message;
+    }
+  }
+
+  return "Something went wrong. Please try again.";
+};
+
 export const useReduxTickets = () => {
-  const dispatch = useAppDispatch();
-
-  const tickets = useAppSelector(selectTickets);
-  const loading = useAppSelector(selectTicketLoading);
-  const error = useAppSelector(selectTicketError);
-  const total = useAppSelector(selectTicketTotal);
-  const submitting = useAppSelector(selectTicketSubmitting);
-
   const [params, setParams] = useState<TicketQueryParams>({
     search: "",
     status: "",
@@ -41,15 +49,43 @@ export const useReduxTickets = () => {
     limit: 5,
   });
 
-  useEffect(() => {
-    const request = dispatch(fetchTickets(params));
+  // Fetch tickets
+  const {
+    data,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetTicketsQuery(params);
 
-    return () => {
-      request.abort();
-    };
-  }, [dispatch, params]);
+  // Create ticket
+  const [createTicket, { isLoading: isCreating }] =
+    useCreateTicketMutation();
 
-  const updateParams = (updates: Partial<TicketQueryParams>) => {
+  // Update ticket
+  const [updateTicket, { isLoading: isUpdating }] =
+    useUpdateTicketMutation();
+
+  // Delete ticket
+  const [deleteTicket, { isLoading: isDeleting }] =
+    useDeleteTicketMutation();
+
+  // Bulk status update
+  const [
+    bulkUpdateStatusMutation,
+    { isLoading: isBulkUpdating },
+  ] = useBulkUpdateStatusMutation();
+
+  // Bulk ticket assignment
+  const [
+    bulkAssignTicketsMutation,
+    { isLoading: isBulkAssigning },
+  ] = useBulkAssignTicketsMutation();
+
+  // Update search, filters, sorting and pagination
+  const updateParams = (
+    updates: Partial<TicketQueryParams>
+  ) => {
     setParams((previous) => ({
       ...previous,
       ...updates,
@@ -59,38 +95,84 @@ export const useReduxTickets = () => {
           : updates.search !== undefined ||
               updates.status !== undefined ||
               updates.priority !== undefined ||
-              updates.sort !== undefined
+              updates.sort !== undefined ||
+              updates.assignedTo !== undefined
             ? 1
             : previous.page,
     }));
   };
 
-  const create = async (data: TicketFormData) => {
-    await dispatch(addTicket(data)).unwrap();
-    dispatch(fetchTickets(params));
+  // Create ticket
+  const create = async (formData: TicketFormData) => {
+    return await createTicket(formData).unwrap();
   };
 
- const update = async (
-  id: string,
-  data: Partial<TicketFormData>
-) => {
-  await dispatch(editTicket({ id, data })).unwrap();
-};
+  // Update ticket
+  const update = async (
+    id: string,
+    formData: Partial<TicketFormData>
+  ) => {
+    return await updateTicket({
+      id,
+      data: formData,
+    }).unwrap();
+  };
 
+  // Delete ticket
   const remove = async (id: string) => {
-    await dispatch(removeTicket(id)).unwrap();
+    return await deleteTicket(id).unwrap();
+  };
+
+  // Bulk update ticket status
+  const bulkUpdateStatus = async (
+    ids: string[],
+    status: Ticket["status"]
+  ) => {
+    return await bulkUpdateStatusMutation({
+      ids,
+      status,
+    }).unwrap();
+  };
+
+  // Bulk assign tickets
+  const bulkAssignTickets = async (
+    ids: string[],
+    agentId: string | null
+  ) => {
+    return await bulkAssignTicketsMutation({
+      ids,
+      agentId,
+    }).unwrap();
   };
 
   return {
-    tickets,
-    loading,
-    error,
-    total,
-    submitting,
+    tickets: data?.data ?? [],
+    loading: isLoading || isFetching,
+
+    error: error ? getApiErrorMessage(error) : null,
+
+    total: data?.total ?? 0,
+
+    submitting:
+      isCreating ||
+      isUpdating ||
+      isDeleting ||
+      isBulkUpdating ||
+      isBulkAssigning,
+
+    isBulkUpdating,
+    isBulkAssigning,
+
     params,
     updateParams,
+
     create,
     update,
     remove,
+
+    bulkUpdateStatus,
+    bulkAssignTickets,
+
+    refetch,
   };
 };

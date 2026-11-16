@@ -1,0 +1,20 @@
+/* Ticket selection checkboxes */
+.data-table input[type="checkbox"] {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.data-table input[type="checkbox"]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.data-table th:first-child,
+.data-table td:first-child {
+  text-align: center;
+}

@@ -1,5 +1,9 @@
 
-import { useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 import type {
   AuthUser,
@@ -18,7 +22,9 @@ export const AuthProvider = ({
 }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
-      const savedUser = sessionStorage.getItem("supportdesk_user");
+      const savedUser = sessionStorage.getItem(
+        "supportdesk_user"
+      );
 
       return savedUser
         ? (JSON.parse(savedUser) as AuthUser)
@@ -31,11 +37,34 @@ export const AuthProvider = ({
 
   const [loading, setLoading] = useState(false);
 
-  const login = async (credentials: LoginCredentials) => {
+  // Handle expired authentication session
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      sessionStorage.removeItem("supportdesk_user");
+      setUser(null);
+    };
+
+    window.addEventListener(
+      "auth:unauthorized",
+      handleUnauthorized
+    );
+
+    return () => {
+      window.removeEventListener(
+        "auth:unauthorized",
+        handleUnauthorized
+      );
+    };
+  }, []);
+
+  const login = async (
+    credentials: LoginCredentials
+  ) => {
     setLoading(true);
 
     try {
-      const authenticatedUser = await loginUser(credentials);
+      const authenticatedUser =
+        await loginUser(credentials);
 
       sessionStorage.setItem(
         "supportdesk_user",
