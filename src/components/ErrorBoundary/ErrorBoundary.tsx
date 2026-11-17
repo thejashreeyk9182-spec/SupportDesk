@@ -1,5 +1,7 @@
+
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
+import { logger } from "../../monitoring/logger";
 
 interface Props {
   children: ReactNode;
@@ -21,14 +23,21 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Application error:", error);
-    console.error("Component details:", info.componentStack);
+    logger.error("Application rendering error", {
+      errorName: error.name,
+      errorMessage: error.message,
+      componentStack: info.componentStack,
+    });
   }
 
   handleRetry = () => {
     this.setState({
       hasError: false,
     });
+  };
+
+  handleReload = () => {
+    window.location.reload();
   };
 
   render() {
@@ -41,6 +50,10 @@ class ErrorBoundary extends Component<Props, State> {
 
           <button onClick={this.handleRetry}>
             Try Again
+          </button>
+
+          <button onClick={this.handleReload}>
+            Reload Application
           </button>
         </div>
       );

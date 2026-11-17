@@ -19,6 +19,11 @@ import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import useToggle from "../../hooks/useToggle";
 
+import {
+  measurePerformance,
+  startPerformanceMeasurement,
+} from "../../monitoring/performanceMonitor";
+
 import type {
   Ticket,
   TicketFormData,
@@ -32,6 +37,23 @@ function Dashboard() {
   const { user, logout } = useAuth();
   const { can } = usePermissions();
   const navigate = useNavigate();
+
+  // Dashboard performance measurement
+  useEffect(() => {
+    const startTime = startPerformanceMeasurement();
+
+    measurePerformance(
+      "Dashboard Mounted",
+      startTime
+    );
+
+    return () => {
+      measurePerformance(
+        "Dashboard Unmounted",
+        startTime
+      );
+    };
+  }, []);
 
   const {
     tickets,
@@ -69,12 +91,19 @@ function Dashboard() {
 
   const [bulkMessage, setBulkMessage] = useState("");
   const [bulkError, setBulkError] = useState("");
-
   const [deleteError, setDeleteError] = useState("");
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // Role and permission checks
   const isManager = user?.role === "MANAGER";
+
+  const canCreateTicket = can("CREATE_TICKET");
+  const canAssignTicket = can("ASSIGN_TICKET");
+  const canDeleteTicket = can("DELETE_TICKET");
+  const canEditTicket = can("EDIT_TICKET");
+  const canUpdateStatus = can("UPDATE_STATUS");
+
   const canViewAll = can("VIEW_ALL_TICKETS");
 
   const assignedTo =
@@ -212,7 +241,7 @@ function Dashboard() {
   // Bulk update selected ticket statuses
   const handleBulkStatusUpdate = async () => {
     if (
-      !can("UPDATE_STATUS") ||
+      !canUpdateStatus ||
       selectedTicketIds.length === 0 ||
       isBulkUpdating
     ) {
@@ -240,10 +269,7 @@ function Dashboard() {
         );
       }
     } catch (error) {
-      console.error(
-        "Bulk status update failed:",
-        error
-      );
+      console.error("Bulk status update failed:", error);
 
       setBulkError(
         "Unable to update selected tickets. Please try again."
@@ -253,7 +279,7 @@ function Dashboard() {
 
   // Create ticket
   const handleCreate = () => {
-    if (isManager || !can("CREATE_TICKET")) return;
+    if (!canCreateTicket) return;
 
     setSelectedTicket(null);
     openForm();
@@ -261,7 +287,7 @@ function Dashboard() {
 
   // Edit ticket
   const handleEdit = (ticket: Ticket) => {
-    if (!can("EDIT_TICKET")) return;
+    if (!canEditTicket) return;
 
     setSelectedTicket(ticket);
     openForm();
@@ -271,11 +297,11 @@ function Dashboard() {
   const handleSubmit = async (data: TicketFormData) => {
     try {
       if (selectedTicket) {
-        if (!can("EDIT_TICKET")) return;
+        if (!canEditTicket) return;
 
         await update(selectedTicket.id, data);
       } else {
-        if (isManager || !can("CREATE_TICKET")) return;
+        if (!canCreateTicket) return;
 
         await create(data);
       }
@@ -290,7 +316,7 @@ function Dashboard() {
 
   // Delete ticket
   const handleDelete = async (id: string) => {
-    if (isManager || !can("DELETE_TICKET")) return;
+    if (!canDeleteTicket) return;
 
     const confirmed = window.confirm(
       `Are you sure you want to delete ticket ${id}?`
@@ -319,7 +345,7 @@ function Dashboard() {
     ticket: Ticket,
     newStatus: Ticket["status"]
   ) => {
-    if (!can("UPDATE_STATUS")) return;
+    if (!canUpdateStatus) return;
 
     try {
       await update(ticket.id, { status: newStatus });
@@ -336,7 +362,7 @@ function Dashboard() {
     ticket: Ticket,
     agentId: string | null
   ) => {
-    if (!isManager || !can("ASSIGN_TICKET")) return;
+    if (!canAssignTicket) return;
 
     try {
       await update(ticket.id, {
@@ -381,12 +407,21 @@ function Dashboard() {
           </div>
 
           <div className="dashboard-actions">
-            {!isManager && can("CREATE_TICKET") && (
+            {canCreateTicket && (
               <Button
                 variant="primary"
                 onClick={handleCreate}
               >
                 + Create Ticket
+              </Button>
+            )}
+
+            {user?.role === "ADMIN" && (
+              <Button
+                variant="secondary"
+                onClick={() => navigate("/monitoring")}
+              >
+                Monitoring
               </Button>
             )}
 
@@ -489,7 +524,7 @@ function Dashboard() {
                     Clear Selection
                   </Button>
 
-                  {can("UPDATE_STATUS") && (
+                  {canUpdateStatus && (
                     <>
                       <select
                         value={bulkStatus}
@@ -565,16 +600,12 @@ function Dashboard() {
                 onSelectTicket={handleSelectTicket}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                canEdit={can("EDIT_TICKET")}
-                canDelete={
-                  !isManager && can("DELETE_TICKET")
-                }
-                canUpdateStatus={can("UPDATE_STATUS")}
+                canEdit={canEditTicket}
+                canDelete={canDeleteTicket}
+                canUpdateStatus={canUpdateStatus}
                 onStatusChange={handleStatusChange}
                 onAssign={handleAssign}
-                canAssign={
-                  isManager && can("ASSIGN_TICKET")
-                }
+                canAssign={canAssignTicket}
               />
 
               <Pagination

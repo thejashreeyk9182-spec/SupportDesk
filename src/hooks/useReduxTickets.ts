@@ -103,10 +103,12 @@ export const useReduxTickets = () => {
   };
 
   // Create ticket
-  const create = async (formData: TicketFormData) => {
-    return await createTicket(formData).unwrap();
-  };
-
+ const create = async (formData: TicketFormData) => {
+  return await createTicket({
+    ...formData,
+    createdAt: new Date().toISOString(),
+  }).unwrap();
+};
   // Update ticket
   const update = async (
     id: string,

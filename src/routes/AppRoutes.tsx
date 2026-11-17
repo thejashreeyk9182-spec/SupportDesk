@@ -1,76 +1,92 @@
 
+import { lazy, Suspense } from "react";
+
 import {
   Navigate,
   Route,
   Routes,
 } from "react-router-dom";
 
-
-import Login from "../pages/Login/Login";
-import Dashboard from "../pages/Dashboard/Dashboard";
-import Unauthorized from "../pages/Unauthorized/Unauthorized";
-
 import ProtectedRoute from "./ProtectedRoute";
 import RoleBasedRoute from "./RoleBasedRoute";
 
 import { useAuth } from "../hooks/useAuth";
 
+// Lazy-loaded pages
+const Login = lazy(() => import("../pages/Login/Login"));
+const Dashboard = lazy(() => import("../pages/Dashboard/Dashboard"));
+const AdminDashboard = lazy(
+  () => import("../pages/Admin/AdminDashboard")
+);
+const Unauthorized = lazy(
+  () => import("../pages/Unauthorized/Unauthorized")
+);
+const MonitoringDashboard = lazy(
+  () => import("../monitoring/MonitoringDashboard")
+);
+
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <Routes>
-      {/* Default route */}
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to={isAuthenticated ? "/dashboard" : "/login"}
-            replace
-          />
-        }
-      />
-
-      {/* Login route */}
-      <Route
-        path="/login"
-        element={
-          isAuthenticated
-            ? <Navigate to="/dashboard" replace />
-            : <Login />
-        }
-      />
-
-      {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
+    <Suspense fallback={<div>Loading page...</div>}>
+      <Routes>
         <Route
-          path="/dashboard"
-          element={<Dashboard />}
+          path="/"
+          element={
+            <Navigate
+              to={isAuthenticated ? "/dashboard" : "/login"}
+              replace
+            />
+          }
         />
 
-        {/* Admin-only route */}
-        <Route element={
-          <RoleBasedRoute allowedRoles={["ADMIN"]} />
-        }>
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login />
+            )
+          }
+        />
+
+        <Route element={<ProtectedRoute />}>
           <Route
-            path="/admin"
-            element={<h1>Administrator Dashboard</h1>}
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          {/* Admin-only routes */}
+          <Route
+            element={
+              <RoleBasedRoute allowedRoles={["ADMIN"]} />
+            }
+          >
+            <Route
+              path="/admin"
+              element={<AdminDashboard />}
+            />
+
+            <Route
+              path="/monitoring"
+              element={<MonitoringDashboard />}
+            />
+          </Route>
+
+          <Route
+            path="/unauthorized"
+            element={<Unauthorized />}
           />
         </Route>
 
-        {/* Unauthorized page */}
         <Route
-          path="/unauthorized"
-          element={<Unauthorized />}
+          path="*"
+          element={<Navigate to="/" replace />}
         />
-      </Route>
-
-      {/* Invalid route */}
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 };
 

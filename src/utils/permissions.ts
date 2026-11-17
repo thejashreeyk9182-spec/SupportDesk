@@ -1,19 +1,25 @@
+
 import type { UserRole } from "../types/auth.types";
 
 export type Permission =
   | "VIEW_TICKETS"
+  | "VIEW_ALL_TICKETS"
+  | "VIEW_ASSIGNED_TICKETS"
   | "CREATE_TICKET"
   | "EDIT_TICKET"
   | "DELETE_TICKET"
   | "ASSIGN_TICKET"
   | "UPDATE_STATUS"
   | "UPDATE_PRIORITY"
-  | "VIEW_DASHBOARD";
+  | "VIEW_DASHBOARD"
+  | "MANAGE_USERS"
+  | "VIEW_TEAM_STATISTICS";
 
-// Permissions assigned to each role
 const rolePermissions: Record<UserRole, Permission[]> = {
   ADMIN: [
     "VIEW_TICKETS",
+    "VIEW_ALL_TICKETS",
+    "VIEW_ASSIGNED_TICKETS",
     "CREATE_TICKET",
     "EDIT_TICKET",
     "DELETE_TICKET",
@@ -21,26 +27,31 @@ const rolePermissions: Record<UserRole, Permission[]> = {
     "UPDATE_STATUS",
     "UPDATE_PRIORITY",
     "VIEW_DASHBOARD",
+    "MANAGE_USERS",
+    "VIEW_TEAM_STATISTICS",
   ],
 
- MANAGER: [
-  "VIEW_TICKETS",
-  "CREATE_TICKET",
-  "EDIT_TICKET",
-  "DELETE_TICKET",
-  "ASSIGN_TICKET",
-  "UPDATE_STATUS",
-  "UPDATE_PRIORITY",
-  "VIEW_DASHBOARD",
-],
+  MANAGER: [
+    "VIEW_TICKETS",
+    "VIEW_ALL_TICKETS",
+    "CREATE_TICKET",
+    "EDIT_TICKET",
+    "ASSIGN_TICKET",
+    "UPDATE_STATUS",
+    "UPDATE_PRIORITY",
+    "VIEW_DASHBOARD",
+    "VIEW_TEAM_STATISTICS",
+  ],
 
   AGENT: [
     "VIEW_TICKETS",
+    "VIEW_ASSIGNED_TICKETS",
+    "CREATE_TICKET",
     "UPDATE_STATUS",
+    "VIEW_DASHBOARD",
   ],
 };
 
-// Check whether a role has a particular permission
 export const hasPermission = (
   role: UserRole,
   permission: Permission
@@ -48,7 +59,6 @@ export const hasPermission = (
   return rolePermissions[role]?.includes(permission) ?? false;
 };
 
-// Get all permissions for a role
 export const getPermissions = (role: UserRole): Permission[] => {
   return rolePermissions[role] ?? [];
 };

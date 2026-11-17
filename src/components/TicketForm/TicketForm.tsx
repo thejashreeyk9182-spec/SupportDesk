@@ -7,6 +7,10 @@ import type {
   TicketFormData,
 } from "../../types/ticket.types";
 
+import {
+  validateTicketForm,
+} from "../../utils/validation";
+
 import Button from "../common/Button";
 import InputField from "../common/forms/InputField";
 import TextAreaField from "../common/forms/TextAreaField";
@@ -70,45 +74,6 @@ const TicketForm = ({
     }));
   };
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    // Customer name validation
-    if (!formData.customerName.trim()) {
-      newErrors.customerName = "Customer name is required";
-    } else if (
-      !/^[a-zA-Z\s]+$/.test(formData.customerName.trim())
-    ) {
-      newErrors.customerName = "Enter a valid customer name";
-    }
-
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(
-        formData.email.trim()
-      )
-    ) {
-      newErrors.email = "Enter a valid email address";
-    }
-
-    // Subject validation
-    if (!formData.subject.trim()) {
-      newErrors.subject = "Subject is required";
-    }
-
-    // Description validation
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Handle priority dropdown
   const handlePriorityChange = (value: string) => {
     setFormData((previous) => ({
       ...previous,
@@ -122,7 +87,6 @@ const TicketForm = ({
     }));
   };
 
-  // Handle status dropdown
   const handleStatusChange = (value: string) => {
     setFormData((previous) => ({
       ...previous,
@@ -136,13 +100,18 @@ const TicketForm = ({
     }));
   };
 
-  // Submit form
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
-    if (!validateForm()) {
+    if (saving) return;
+
+    const validationErrors = validateTicketForm(formData);
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
@@ -169,7 +138,6 @@ const TicketForm = ({
   return (
     <div className="ticket-form-overlay">
       <div className="ticket-form-container">
-        {/* Form header */}
         <div className="ticket-form-header">
           <h2>{ticket ? "Edit Ticket" : "Create New Ticket"}</h2>
 
@@ -184,9 +152,8 @@ const TicketForm = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
           <div className="ticket-form-body">
-            {/* Customer name */}
             <InputField
               id="customerName"
               name="customerName"
@@ -198,7 +165,6 @@ const TicketForm = ({
               onChange={handleChange}
             />
 
-            {/* Email */}
             <InputField
               id="email"
               name="email"
@@ -207,12 +173,10 @@ const TicketForm = ({
               value={formData.email}
               placeholder="Enter email address"
               required
+              error={errors.email}
               onChange={handleChange}
             />
 
-            <FormError message={errors.email} />
-
-            {/* Subject */}
             <InputField
               id="subject"
               name="subject"
@@ -224,7 +188,6 @@ const TicketForm = ({
               onChange={handleChange}
             />
 
-            {/* Description */}
             <TextAreaField
               id="description"
               name="description"
@@ -237,7 +200,6 @@ const TicketForm = ({
               onChange={handleChange}
             />
 
-            {/* Priority and status dropdowns */}
             <div className="ticket-form-row">
               <Dropdown
                 label="Priority"
@@ -264,13 +226,11 @@ const TicketForm = ({
               />
             </div>
 
-            {/* Submit error */}
             {errors.submit && (
               <FormError message={errors.submit} />
             )}
           </div>
 
-          {/* Form footer */}
           <div className="ticket-form-footer">
             <Button
               variant="secondary"
@@ -284,6 +244,7 @@ const TicketForm = ({
               variant="primary"
               type="submit"
               loading={saving}
+              disabled={saving}
             >
               {ticket ? "Update Ticket" : "Create Ticket"}
             </Button>

@@ -6,6 +6,8 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 
+import { recordApiRequest } from "../../monitoring/apiMonitor";
+
 export interface ApiError {
   status: FetchBaseQueryError["status"];
   message: string;
@@ -72,10 +74,21 @@ export const baseQuery: BaseQueryFn<
   unknown,
   ApiError
 > = async (args, api, extraOptions) => {
+  const method =
+    typeof args === "string"
+      ? "GET"
+      : (args.method ?? "GET").toUpperCase();
+
+  const rawEndpoint = typeof args === "string" ? args : args.url;
+  const endpoint = rawEndpoint.split("?")[0];
+
+  const startTime = Date.now();
+
   let result = await rawBaseQuery(args, api, extraOptions);
   let retryCount = 0;
 
   while (
+    method === "GET" &&
     result.error &&
     shouldRetry(result.error) &&
     retryCount < MAX_RETRIES
@@ -84,7 +97,22 @@ export const baseQuery: BaseQueryFn<
     result = await rawBaseQuery(args, api, extraOptions);
   }
 
+  const duration = Date.now() - startTime;
+
   if (result.error) {
+    const message = getErrorMessage(result.error);
+
+    recordApiRequest({
+      id: `${Date.now()}-${Math.random()}`,
+      endpoint,
+      method,
+      status: result.error.status,
+      duration,
+      success: false,
+      timestamp: new Date().toISOString(),
+      errorMessage: message,
+    });
+
     if (
       result.error.status === 401 &&
       typeof window !== "undefined"
@@ -95,10 +123,20 @@ export const baseQuery: BaseQueryFn<
     return {
       error: {
         status: result.error.status,
-        message: getErrorMessage(result.error),
+        message,
       },
     };
   }
+
+  recordApiRequest({
+    id: `${Date.now()}-${Math.random()}`,
+    endpoint,
+    method,
+    status: result.meta?.response?.status ?? 200,
+    duration,
+    success: true,
+    timestamp: new Date().toISOString(),
+  });
 
   return {
     data: result.data,

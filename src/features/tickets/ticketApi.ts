@@ -138,11 +138,14 @@ export const ticketApi = createApi({
               })),
               { type: "Ticket" as const, id: "LIST" },
             ]
-          : [{ type: "Ticket", id: "LIST" }],
+          : [{ type: "Ticket" as const, id: "LIST" }],
     }),
 
     // Create ticket
-    createTicket: builder.mutation<Ticket, TicketFormData>({
+    createTicket: builder.mutation<
+      Ticket,
+      TicketFormData & { createdAt: string }
+    >({
       query: (data) => ({
         url: "/tickets",
         method: "POST",
