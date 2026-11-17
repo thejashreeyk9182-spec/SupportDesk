@@ -1,7 +1,8 @@
 
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
-import { logger } from "../../monitoring/logger";
+
+import { reportError } from "../../monitoring/errorReporter";
 
 interface Props {
   children: ReactNode;
@@ -23,11 +24,12 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    logger.error("Application rendering error", {
-      errorName: error.name,
-      errorMessage: error.message,
-      componentStack: info.componentStack,
-    });
+    reportError(error, "React Error Boundary");
+
+    // Component stack is useful for local debugging.
+    if (import.meta.env.DEV) {
+      console.error("Component stack:", info.componentStack);
+    }
   }
 
   handleRetry = () => {

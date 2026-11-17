@@ -10,8 +10,15 @@ import {
 
 import {
   getPerformanceMetrics,
+  subscribeToPerformanceMetrics,
   type PerformanceMetric,
 } from "./performanceMonitor";
+
+import {
+  getReportedErrors,
+  subscribeToReportedErrors,
+  type ReportedError,
+} from "./errorReporter";
 
 import "../App.css";
 
@@ -25,13 +32,30 @@ function MonitoringDashboard() {
       getPerformanceMetrics()
     );
 
+  const [applicationErrors, setApplicationErrors] =
+    useState<ReportedError[]>(() => getReportedErrors());
+
   useEffect(() => {
-    const unsubscribe = subscribeToApiMetrics((metrics) => {
+    const unsubscribeApi = subscribeToApiMetrics((metrics) => {
       setApiMetrics(metrics);
-      setPerformanceMetrics(getPerformanceMetrics());
     });
 
-    return unsubscribe;
+    const unsubscribePerformance =
+      subscribeToPerformanceMetrics((metrics) => {
+        setPerformanceMetrics(metrics);
+      });
+
+    const unsubscribeErrors = subscribeToReportedErrors(
+      (errors) => {
+        setApplicationErrors(errors);
+      }
+    );
+
+    return () => {
+      unsubscribeApi();
+      unsubscribePerformance();
+      unsubscribeErrors();
+    };
   }, []);
 
   const summary = getApiSummary();
@@ -42,7 +66,7 @@ function MonitoringDashboard() {
         <div>
           <h1>Application Monitoring</h1>
           <p>
-            Monitor API requests and application performance.
+            Monitor API requests, application errors and performance.
           </p>
         </div>
       </div>
@@ -119,18 +143,54 @@ function MonitoringDashboard() {
               <thead>
                 <tr>
                   <th>Measurement</th>
-                  <th>Duration</th>
+                  <th>Value</th>
                   <th>Timestamp</th>
                 </tr>
               </thead>
 
               <tbody>
                 {performanceMetrics.map((metric, index) => (
-                  <tr key={`${metric.timestamp}-${index}`}>
+                  <tr key={`${metric.name}-${metric.timestamp}-${index}`}>
                     <td>{metric.name}</td>
-                    <td>{metric.duration} ms</td>
+                    <td>
+                      {metric.duration}
+                      {metric.unit === "score" ? "" : " ms"}
+                    </td>
                     <td>
                       {new Date(metric.timestamp).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Recent application errors */}
+      <section className="ticket-section">
+        <h2>Recent Application Errors</h2>
+
+        {applicationErrors.length === 0 ? (
+          <p>No application errors recorded.</p>
+        ) : (
+          <div className="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Error Message</th>
+                  <th>Source</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {applicationErrors.map((error) => (
+                  <tr key={error.id}>
+                    <td>{error.message}</td>
+                    <td>{error.source}</td>
+                    <td>
+                      {new Date(error.timestamp).toLocaleString()}
                     </td>
                   </tr>
                 ))}

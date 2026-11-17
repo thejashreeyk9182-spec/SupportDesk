@@ -74,3 +74,39 @@ https://supportdes-dashboard.netlify.app
 ## GitHub
 
 https://github.com/thejashreeyk9182-spec/SupportDesk
+
+
+## Application Monitoring
+
+The application includes a basic client-side monitoring system.
+
+### Structured Logging
+- Supports info, warning, error and debug log levels.
+- Includes timestamps and contextual information.
+- Redacts common sensitive context fields.
+
+### API Monitoring
+- Tracks API endpoints, HTTP methods and response status.
+- Records request duration and success or failure.
+- Retries eligible failed GET requests.
+- Maintains the latest 100 API metrics.
+
+### Performance Monitoring
+- Measures custom application operations.
+- Observes browser performance entries for FCP, LCP, CLS and event durations.
+- Tracks an approximate INP session measurement.
+- Records navigation TTFB.
+
+### Error Handling
+- React Error Boundary for rendering errors.
+- Global JavaScript error handling.
+- Unhandled promise rejection handling.
+- Centralized error reporting.
+
+### Monitoring Dashboard
+- Displays API request statistics.
+- Shows recent API activity.
+- Displays performance measurements.
+- Lists recent application errors.
+
+Note: Monitoring data is maintained in memory and resets when the application is refreshed. Error reporting is currently local; no external monitoring service is connected.
