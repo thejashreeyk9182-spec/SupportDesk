@@ -7,6 +7,7 @@ interface CheckboxFieldProps {
   label: string;
   checked: boolean;
   required?: boolean;
+  disabled?: boolean;
   error?: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
@@ -17,6 +18,7 @@ const CheckboxField = ({
   label,
   checked,
   required = false,
+  disabled = false,
   error,
   onChange,
 }: CheckboxFieldProps) => {
@@ -29,6 +31,7 @@ const CheckboxField = ({
           type="checkbox"
           checked={checked}
           required={required}
+          disabled={disabled}
           onChange={onChange}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}

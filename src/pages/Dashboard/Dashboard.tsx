@@ -18,6 +18,7 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 import useToggle from "../../hooks/useToggle";
+import useDashboardTickets from "../../hooks/useDashboardTickets";
 
 import {
   measurePerformance,
@@ -38,18 +39,13 @@ function Dashboard() {
   const { can } = usePermissions();
   const navigate = useNavigate();
 
-  // Dashboard performance measurement
+  // Dashboard session duration measurement
   useEffect(() => {
     const startTime = startPerformanceMeasurement();
 
-    measurePerformance(
-      "Dashboard Mounted",
-      startTime
-    );
-
     return () => {
       measurePerformance(
-        "Dashboard Unmounted",
+        "Dashboard Session Duration",
         startTime
       );
     };
@@ -83,14 +79,6 @@ function Dashboard() {
   const [selectedTicket, setSelectedTicket] =
     useState<Ticket | null>(null);
 
-  const [selectedTicketIds, setSelectedTicketIds] =
-    useState<string[]>([]);
-
-  const [bulkStatus, setBulkStatus] =
-    useState<Ticket["status"]>("In Progress");
-
-  const [bulkMessage, setBulkMessage] = useState("");
-  const [bulkError, setBulkError] = useState("");
   const [deleteError, setDeleteError] = useState("");
 
   const debouncedSearch = useDebounce(search, 500);
@@ -103,13 +91,32 @@ function Dashboard() {
   const canDeleteTicket = can("DELETE_TICKET");
   const canEditTicket = can("EDIT_TICKET");
   const canUpdateStatus = can("UPDATE_STATUS");
-
   const canViewAll = can("VIEW_ALL_TICKETS");
 
   const assignedTo =
     !canViewAll && can("VIEW_ASSIGNED_TICKETS")
       ? user?.id ?? ""
       : "";
+
+  // Dashboard ticket selection and bulk actions
+  const {
+    selectedTicketIds,
+    bulkStatus,
+    setBulkStatus,
+    bulkMessage,
+    bulkError,
+    allCurrentPageSelected,
+    handleSelectTicket,
+    handleSelectAll,
+    handleClearSelection,
+    removeSelectedTicket,
+    handleBulkStatusUpdate,
+  } = useDashboardTickets({
+    tickets,
+    bulkUpdateStatus,
+    canUpdateStatus,
+    isBulkUpdating,
+  });
 
   const currentPage = params.page ?? 1;
 
@@ -183,100 +190,6 @@ function Dashboard() {
     refetch();
   };
 
-  // Select or deselect one ticket
-  const handleSelectTicket = (ticketId: string) => {
-    setSelectedTicketIds((previous) =>
-      previous.includes(ticketId)
-        ? previous.filter((id) => id !== ticketId)
-        : [...previous, ticketId]
-    );
-
-    setBulkMessage("");
-    setBulkError("");
-  };
-
-  // Select or deselect all tickets on current page
-  const handleSelectAll = () => {
-    const currentPageIds = tickets.map(
-      (ticket) => ticket.id
-    );
-
-    const allSelected =
-      currentPageIds.length > 0 &&
-      currentPageIds.every((id) =>
-        selectedTicketIds.includes(id)
-      );
-
-    if (allSelected) {
-      setSelectedTicketIds((previous) =>
-        previous.filter(
-          (id) => !currentPageIds.includes(id)
-        )
-      );
-    } else {
-      setSelectedTicketIds((previous) =>
-        Array.from(
-          new Set([...previous, ...currentPageIds])
-        )
-      );
-    }
-
-    setBulkMessage("");
-    setBulkError("");
-  };
-
-  // Clear all selections
-  const handleClearSelection = () => {
-    setSelectedTicketIds([]);
-    setBulkMessage("");
-    setBulkError("");
-  };
-
-  const allCurrentPageSelected =
-    tickets.length > 0 &&
-    tickets.every((ticket) =>
-      selectedTicketIds.includes(ticket.id)
-    );
-
-  // Bulk update selected ticket statuses
-  const handleBulkStatusUpdate = async () => {
-    if (
-      !canUpdateStatus ||
-      selectedTicketIds.length === 0 ||
-      isBulkUpdating
-    ) {
-      return;
-    }
-
-    try {
-      setBulkMessage("");
-      setBulkError("");
-
-      const result = await bulkUpdateStatus(
-        selectedTicketIds,
-        bulkStatus
-      );
-
-      setSelectedTicketIds(result.failedIds);
-
-      if (result.failedIds.length > 0) {
-        setBulkMessage(
-          `${result.updatedIds.length} ticket(s) updated. ${result.failedIds.length} failed. Failed tickets remain selected.`
-        );
-      } else {
-        setBulkMessage(
-          `${result.updatedIds.length} ticket(s) updated successfully.`
-        );
-      }
-    } catch (error) {
-      console.error("Bulk status update failed:", error);
-
-      setBulkError(
-        "Unable to update selected tickets. Please try again."
-      );
-    }
-  };
-
   // Create ticket
   const handleCreate = () => {
     if (!canCreateTicket) return;
@@ -328,9 +241,7 @@ function Dashboard() {
       setDeleteError("");
       await remove(id);
 
-      setSelectedTicketIds((previous) =>
-        previous.filter((ticketId) => ticketId !== id)
-      );
+      removeSelectedTicket(id);
     } catch (error) {
       console.error("Unable to delete ticket:", error);
 

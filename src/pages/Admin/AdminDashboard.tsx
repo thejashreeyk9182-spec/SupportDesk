@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import Button from "../../components/common/Button";
+import Card from "../../components/common/Card";
 
 import {
   getApiSummary,
@@ -26,14 +27,22 @@ function AdminDashboard() {
       setSummary(getApiSummary());
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return unsubscribe;
   }, []);
 
+  // Logout
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
+  };
+
+  // Navigation
+  const handleMonitoring = () => {
+    navigate("/monitoring");
+  };
+
+  const handleTickets = () => {
+    navigate("/dashboard");
   };
 
   return (
@@ -56,14 +65,14 @@ function AdminDashboard() {
           <div className="dashboard-actions">
             <Button
               variant="primary"
-              onClick={() => navigate("/monitoring")}
+              onClick={handleMonitoring}
             >
               Application Monitoring
             </Button>
 
             <Button
               variant="secondary"
-              onClick={() => navigate("/dashboard")}
+              onClick={handleTickets}
             >
               Customer Support
             </Button>
@@ -79,58 +88,50 @@ function AdminDashboard() {
 
         {/* API Monitoring Statistics */}
         <section className="stats-grid">
-          <div className="card">
-            <h2>Total API Requests</h2>
+          <Card title="Total API Requests">
             <h2>{summary.total}</h2>
-          </div>
+          </Card>
 
-          <div className="card">
-            <h2>Successful Requests</h2>
+          <Card title="Successful Requests">
             <h2>{summary.successful}</h2>
-          </div>
+          </Card>
 
-          <div className="card">
-            <h2>Failed Requests</h2>
+          <Card title="Failed Requests">
             <h2>{summary.failed}</h2>
-          </div>
+          </Card>
 
-          <div className="card">
-            <h2>Average Response Time</h2>
+          <Card title="Average Response Time">
             <h2>{summary.averageDuration} ms</h2>
-          </div>
+          </Card>
         </section>
 
         {/* Dashboard Navigation */}
         <section className="stats-grid">
-          <div className="card">
-            <h2>Application Monitoring</h2>
-
+          <Card title="Application Monitoring">
             <p>
               Monitor API requests, failures and response times.
             </p>
 
             <Button
               variant="primary"
-              onClick={() => navigate("/monitoring")}
+              onClick={handleMonitoring}
             >
               View Monitoring
             </Button>
-          </div>
+          </Card>
 
-          <div className="card">
-            <h2>Customer Support</h2>
-
+          <Card title="Customer Support">
             <p>
               View and manage customer support tickets.
             </p>
 
             <Button
               variant="primary"
-              onClick={() => navigate("/dashboard")}
+              onClick={handleTickets}
             >
               View Tickets
             </Button>
-          </div>
+          </Card>
         </section>
       </main>
     </div>

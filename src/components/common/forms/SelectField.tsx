@@ -13,6 +13,7 @@ interface SelectFieldProps {
   value: string;
   options: SelectOption[];
   required?: boolean;
+  disabled?: boolean;
   error?: string;
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
 }
@@ -24,6 +25,7 @@ const SelectField = ({
   value,
   options,
   required = false,
+  disabled = false,
   error,
   onChange,
 }: SelectFieldProps) => {
@@ -38,6 +40,7 @@ const SelectField = ({
         name={name}
         value={value}
         required={required}
+        disabled={disabled}
         onChange={onChange}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}

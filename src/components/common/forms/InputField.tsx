@@ -9,6 +9,7 @@ interface InputFieldProps {
   type?: string;
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
   error?: string;
   autoComplete?: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -22,6 +23,7 @@ const InputField = ({
   type = "text",
   placeholder,
   required = false,
+  disabled = false,
   error,
   autoComplete,
   onChange,
@@ -39,6 +41,7 @@ const InputField = ({
         value={value}
         placeholder={placeholder}
         required={required}
+        disabled={disabled}
         autoComplete={autoComplete}
         onChange={onChange}
         aria-invalid={Boolean(error)}

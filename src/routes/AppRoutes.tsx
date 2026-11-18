@@ -1,5 +1,5 @@
 
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 
 import {
   Navigate,
@@ -14,13 +14,19 @@ import { useAuth } from "../hooks/useAuth";
 
 // Lazy-loaded pages
 const Login = lazy(() => import("../pages/Login/Login"));
-const Dashboard = lazy(() => import("../pages/Dashboard/Dashboard"));
+
+const Dashboard = lazy(
+  () => import("../pages/Dashboard/Dashboard")
+);
+
 const AdminDashboard = lazy(
   () => import("../pages/Admin/AdminDashboard")
 );
+
 const Unauthorized = lazy(
   () => import("../pages/Unauthorized/Unauthorized")
 );
+
 const MonitoringDashboard = lazy(
   () => import("../monitoring/MonitoringDashboard")
 );
@@ -29,64 +35,62 @@ const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <Suspense fallback={<div>Loading page...</div>}>
-      <Routes>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={isAuthenticated ? "/dashboard" : "/login"}
+            replace
+          />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Login />
+          )
+        }
+      />
+
+      <Route element={<ProtectedRoute />}>
         <Route
-          path="/"
-          element={
-            <Navigate
-              to={isAuthenticated ? "/dashboard" : "/login"}
-              replace
-            />
-          }
+          path="/dashboard"
+          element={<Dashboard />}
         />
 
+        {/* Admin-only routes */}
         <Route
-          path="/login"
           element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Login />
-            )
+            <RoleBasedRoute allowedRoles={["ADMIN"]} />
           }
-        />
-
-        <Route element={<ProtectedRoute />}>
+        >
           <Route
-            path="/dashboard"
-            element={<Dashboard />}
+            path="/admin"
+            element={<AdminDashboard />}
           />
 
-          {/* Admin-only routes */}
           <Route
-            element={
-              <RoleBasedRoute allowedRoles={["ADMIN"]} />
-            }
-          >
-            <Route
-              path="/admin"
-              element={<AdminDashboard />}
-            />
-
-            <Route
-              path="/monitoring"
-              element={<MonitoringDashboard />}
-            />
-          </Route>
-
-          <Route
-            path="/unauthorized"
-            element={<Unauthorized />}
+            path="/monitoring"
+            element={<MonitoringDashboard />}
           />
         </Route>
 
         <Route
-          path="*"
-          element={<Navigate to="/" replace />}
+          path="/unauthorized"
+          element={<Unauthorized />}
         />
-      </Routes>
-    </Suspense>
+      </Route>
+
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
+    </Routes>
   );
 };
 

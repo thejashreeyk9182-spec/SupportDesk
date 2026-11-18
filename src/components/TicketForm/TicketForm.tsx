@@ -7,15 +7,13 @@ import type {
   TicketFormData,
 } from "../../types/ticket.types";
 
-import {
-  validateTicketForm,
-} from "../../utils/validation";
+import { validateTicketForm } from "../../utils/validation";
 
-import Button from "../common/Button";
 import InputField from "../common/forms/InputField";
 import TextAreaField from "../common/forms/TextAreaField";
+import SelectField from "../common/forms/SelectField";
+import SubmitButton from "../common/forms/SubmitButton";
 import FormError from "../common/forms/FormError";
-import Dropdown from "../common/Dropdown";
 
 import "./TicketForm.css";
 
@@ -74,32 +72,6 @@ const TicketForm = ({
     }));
   };
 
-  const handlePriorityChange = (value: string) => {
-    setFormData((previous) => ({
-      ...previous,
-      priority: value as TicketFormData["priority"],
-    }));
-
-    setErrors((previous) => ({
-      ...previous,
-      priority: "",
-      submit: "",
-    }));
-  };
-
-  const handleStatusChange = (value: string) => {
-    setFormData((previous) => ({
-      ...previous,
-      status: value as TicketFormData["status"],
-    }));
-
-    setErrors((previous) => ({
-      ...previous,
-      status: "",
-      submit: "",
-    }));
-  };
-
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ) => {
@@ -152,7 +124,7 @@ const TicketForm = ({
           </button>
         </div>
 
-      <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="ticket-form-body">
             <InputField
               id="customerName"
@@ -161,6 +133,7 @@ const TicketForm = ({
               value={formData.customerName}
               placeholder="Enter customer name"
               required
+              disabled={saving}
               error={errors.customerName}
               onChange={handleChange}
             />
@@ -173,6 +146,7 @@ const TicketForm = ({
               value={formData.email}
               placeholder="Enter email address"
               required
+              disabled={saving}
               error={errors.email}
               onChange={handleChange}
             />
@@ -184,6 +158,7 @@ const TicketForm = ({
               value={formData.subject}
               placeholder="Enter ticket subject"
               required
+              disabled={saving}
               error={errors.subject}
               onChange={handleChange}
             />
@@ -196,33 +171,42 @@ const TicketForm = ({
               placeholder="Enter ticket description"
               rows={4}
               required
+              disabled={saving}
               error={errors.description}
               onChange={handleChange}
             />
 
             <div className="ticket-form-row">
-              <Dropdown
-                label="Priority"
+              <SelectField
+                id="priority"
                 name="priority"
+                label="Priority"
                 value={formData.priority}
                 options={[
                   { label: "High", value: "High" },
                   { label: "Medium", value: "Medium" },
                   { label: "Low", value: "Low" },
                 ]}
-                onChange={handlePriorityChange}
+                required
+                disabled={saving}
+                error={errors.priority}
+                onChange={handleChange}
               />
 
-              <Dropdown
-                label="Status"
+              <SelectField
+                id="status"
                 name="status"
+                label="Status"
                 value={formData.status}
                 options={[
                   { label: "Open", value: "Open" },
                   { label: "In Progress", value: "In Progress" },
                   { label: "Resolved", value: "Resolved" },
                 ]}
-                onChange={handleStatusChange}
+                required
+                disabled={saving}
+                error={errors.status}
+                onChange={handleChange}
               />
             </div>
 
@@ -232,22 +216,20 @@ const TicketForm = ({
           </div>
 
           <div className="ticket-form-footer">
-            <Button
-              variant="secondary"
+            <button
+              type="button"
+              className="ticket-form-cancel"
               onClick={onClose}
               disabled={saving}
             >
               Cancel
-            </Button>
+            </button>
 
-            <Button
-              variant="primary"
-              type="submit"
+            <SubmitButton
+              label={ticket ? "Update Ticket" : "Create Ticket"}
               loading={saving}
-              disabled={saving}
-            >
-              {ticket ? "Update Ticket" : "Create Ticket"}
-            </Button>
+              loadingText="Saving..."
+            />
           </div>
         </form>
       </div>

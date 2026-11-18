@@ -9,6 +9,7 @@ interface TextAreaFieldProps {
   placeholder?: string;
   rows?: number;
   required?: boolean;
+  disabled?: boolean;
   error?: string;
   onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
 }
@@ -21,6 +22,7 @@ const TextAreaField = ({
   placeholder,
   rows = 4,
   required = false,
+  disabled = false,
   error,
   onChange,
 }: TextAreaFieldProps) => {
@@ -37,6 +39,7 @@ const TextAreaField = ({
         placeholder={placeholder}
         rows={rows}
         required={required}
+        disabled={disabled}
         onChange={onChange}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
@@ -46,6 +49,7 @@ const TextAreaField = ({
         <span
           id={`${id}-error`}
           className="ticket-form-error"
+          role="alert"
         >
           {error}
         </span>
